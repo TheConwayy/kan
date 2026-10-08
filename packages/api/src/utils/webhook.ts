@@ -36,6 +36,10 @@ export interface WebhookPayload {
       name: string | null;
     };
     changes?: Record<string, { from: unknown; to: unknown }>;
+    comment?: {
+      publicId: string;
+      comment: string;
+    };
   };
 }
 
@@ -237,6 +241,10 @@ export function createCardWebhookPayload(
       name: string | null;
     };
     changes?: Record<string, { from: unknown; to: unknown }>;
+    comment?: {
+      publicId: string;
+      comment: string;
+    };
   },
 ): WebhookPayload {
   return {
@@ -260,6 +268,7 @@ export function createCardWebhookPayload(
         : undefined,
       user: context.user,
       changes: context.changes,
+      comment: context.comment,
     },
   };
 }

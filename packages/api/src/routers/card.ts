@@ -292,6 +292,40 @@ export const cardRouter = createTRPCRouter({
         commentId: newComment.id,
       });
 
+      // Fire webhooks (non-blocking)
+      const fullCard = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
+      if (fullCard) {
+        sendWebhooksForWorkspace(
+          ctx.db,
+          card.workspaceId,
+          createCardWebhookPayload(
+            "comment.created",
+            {
+              id: String(fullCard.id),
+              publicId: fullCard.publicId,
+              title: fullCard.title,
+              description: fullCard.description,
+              dueDate: fullCard.dueDate,
+              listId: fullCard.list.publicId,
+            },
+            {
+              boardId: card.boardPublicId,
+              boardName: card.boardName,
+              listName: fullCard.list.name,
+              user: ctx.user
+                ? { id: ctx.user.id, name: ctx.user.name }
+                : undefined,
+              comment: {
+                publicId: newComment.publicId,
+                comment: newComment.comment,
+              },
+            },
+          ),
+        ).catch((error) => {
+          console.error("Webhook delivery failed:", error);
+        });
+      }
+
       return newComment;
     }),
   updateComment: protectedProcedure

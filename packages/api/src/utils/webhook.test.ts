@@ -66,6 +66,28 @@ describe("webhook utilities", () => {
       expect(payload.data.card.publicId).toBe("card-pub-123");
     });
 
+    it("includes the comment for comment.created events", () => {
+      const payload = createCardWebhookPayload(
+        "comment.created",
+        {
+          id: "card-123",
+          publicId: "card-pub-123",
+          title: "Test Card",
+          listId: "list-456",
+        },
+        {
+          boardId: "board-789",
+          comment: { publicId: "comment-pub-1", comment: "<p>Looks good</p>" },
+        },
+      );
+
+      expect(payload.event).toBe("comment.created");
+      expect(payload.data.comment).toEqual({
+        publicId: "comment-pub-1",
+        comment: "<p>Looks good</p>",
+      });
+    });
+
     it("includes optional card fields when provided", () => {
       const dueDate = new Date("2024-02-01T10:00:00.000Z");
       const payload = createCardWebhookPayload(
